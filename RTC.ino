@@ -154,7 +154,7 @@ void loop()
     DS3231_get(&t); //Get time
     // Check for DST
     if (!IsDST(t.mday, t.mon, t.wday)) {
-      --t.hour; // DST set clock back 1 hour
+      --t.hour; //Not DST set clock back 1 hour
 #ifdef DEBUG
       Serial.println("It is DST");
       Serial.println();
