@@ -1,6 +1,6 @@
 /*
   RTC
-  Used a RTC module along with a LCD Shield to display
+  Uses a RTC module along with a LCD Shield to display
   date, time, temperature (either in F or C), DST and DOW.
   Hacked from many places.  Thanks all.
 
@@ -42,17 +42,16 @@ byte buttonJustReleased = false;         //this will be true after a ReadButtons
 byte buttonWas          = BUTTON_NONE;   //used by ReadButtons() for detection of button events
 
 // Set up the one time stuff
-void setup()
-{
+void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
   //button adc input
-  pinMode( BUTTON_ADC_PIN, INPUT );         //ensure A0 is an input
-  digitalWrite( BUTTON_ADC_PIN, LOW );      //ensure pullup is off on A0
+  pinMode(BUTTON_ADC_PIN, INPUT);         //ensure A0 is an input
+  digitalWrite(BUTTON_ADC_PIN, LOW);      //ensure pullup is off on A0
   //lcd backlight control
-  pinMode( LCD_BACKLIGHT_PIN, OUTPUT );     //D10 is an output
-  digitalWrite( LCD_BACKLIGHT_PIN, HIGH );  //backlight control pin D10 is high (on)
+  pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //D10 is an output
+  digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //backlight control pin D10 is high (on)
 
   Wire.begin();
   DS3231_init(DS3231_INTCN);
@@ -63,11 +62,12 @@ void setup()
 
   lcd.begin(16, 2);
   lcd.clear();
+  // Used to set the clock one time
+//    Serial.println("Setting time");
+//    parse_cmd("T000310321032016", 16);
+//              ssmmhhWDDMMYYYY
 
-  //  Serial.println("Setting time");
-  //    parse_cmd("T005911020032016", 16);
-  //                ssmmhhWDDMMYYYY
-
+  // Desplay splash screen for 5 seconds
   lcd.setCursor(6, 0);
   lcd.print("RTC");
   lcd.setCursor(2, 1);
@@ -75,6 +75,7 @@ void setup()
   delay (5000);
 }
 
+// Main loop (forever) routine
 void loop()
 {
   char in;
@@ -95,7 +96,7 @@ void loop()
   //get the latest button pressed, also the buttonJustPressed, buttonJustReleased flags
   button = ReadButtons();
   //show text label for the button pressed
-  switch ( button )
+  switch (button)
   {
     case BUTTON_NONE:
       {
@@ -116,12 +117,12 @@ void loop()
       }
     case BUTTON_UP:
       {
-        //        Not ueed for now
+        //        Not used for now
         break;
       }
     case BUTTON_DOWN:
       {
-        //        Not ueed for now
+        //        Not used for now
         break;
       }
     case BUTTON_LEFT:
@@ -173,7 +174,7 @@ void loop()
     else {
       dtostrf(temperature, 4, 1, tempF);
     }
-    
+
 #ifdef DEBUG
     if (t.mon < 10)
       Serial.print('0');
@@ -274,6 +275,9 @@ void loop()
   }
 }
 
+/*
+   Parse command
+*/
 void parse_cmd(char *cmd, int cmdsize)
 {
   uint8_t i;
@@ -368,6 +372,9 @@ void parse_cmd(char *cmd, int cmdsize)
   }
 }
 
+/*
+   Print the month as a word
+*/
 void printMonth(int month)
 {
   switch (month)
@@ -401,40 +408,33 @@ byte ReadButtons()
   //read the button ADC pin voltage
   buttonVoltage = analogRead( BUTTON_ADC_PIN );
   //sense if the voltage falls within valid voltage windows
-  if ( buttonVoltage < ( RIGHT_10BIT_ADC + BUTTONHYSTERESIS ) )
-  {
+  if (buttonVoltage < ( RIGHT_10BIT_ADC + BUTTONHYSTERESIS)) {
     button = BUTTON_RIGHT;
   }
-  else if (   buttonVoltage >= ( UP_10BIT_ADC - BUTTONHYSTERESIS )
-              && buttonVoltage <= ( UP_10BIT_ADC + BUTTONHYSTERESIS ) )
-  {
+  else if (buttonVoltage >= (UP_10BIT_ADC - BUTTONHYSTERESIS)
+           && buttonVoltage <= (UP_10BIT_ADC + BUTTONHYSTERESIS)) {
     button = BUTTON_UP;
   }
-  else if (   buttonVoltage >= ( DOWN_10BIT_ADC - BUTTONHYSTERESIS )
-              && buttonVoltage <= ( DOWN_10BIT_ADC + BUTTONHYSTERESIS ) )
-  {
+  else if (buttonVoltage >= (DOWN_10BIT_ADC - BUTTONHYSTERESIS)
+           && buttonVoltage <= (DOWN_10BIT_ADC + BUTTONHYSTERESIS)) {
     button = BUTTON_DOWN;
   }
-  else if (   buttonVoltage >= ( LEFT_10BIT_ADC - BUTTONHYSTERESIS )
-              && buttonVoltage <= ( LEFT_10BIT_ADC + BUTTONHYSTERESIS ) )
-  {
+  else if (buttonVoltage >= (LEFT_10BIT_ADC - BUTTONHYSTERESIS)
+           && buttonVoltage <= (LEFT_10BIT_ADC + BUTTONHYSTERESIS)) {
     button = BUTTON_LEFT;
   }
-  else if (   buttonVoltage >= ( SELECT_10BIT_ADC - BUTTONHYSTERESIS )
-              && buttonVoltage <= ( SELECT_10BIT_ADC + BUTTONHYSTERESIS ) )
-  {
+  else if (buttonVoltage >= (SELECT_10BIT_ADC - BUTTONHYSTERESIS)
+           && buttonVoltage <= (SELECT_10BIT_ADC + BUTTONHYSTERESIS)) {
     button = BUTTON_SELECT;
   }
   //handle button flags for just pressed and just released events
-  if ( ( buttonWas == BUTTON_NONE ) && ( button != BUTTON_NONE ) )
-  {
+  if ((buttonWas == BUTTON_NONE) && (button != BUTTON_NONE)) {
     //the button was just pressed, set buttonJustPressed, this can optionally be used to trigger a once-off action for a button press event
     //it's the duty of the receiver to clear these flags if it wants to detect a new button change event
     buttonJustPressed  = true;
     buttonJustReleased = false;
   }
-  if ( ( buttonWas != BUTTON_NONE ) && ( button == BUTTON_NONE ) )
-  {
+  if (( buttonWas != BUTTON_NONE) && (button == BUTTON_NONE)) {
     buttonJustPressed  = false;
     buttonJustReleased = true;
   }
@@ -442,11 +442,11 @@ byte ReadButtons()
   //save the latest button value, for change event detection next time round
   buttonWas = button;
 
-  return ( button );
+  return (button);
 }
 
 /* Check to see if it's DST
- http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
+  http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
 */
 bool IsDST(int day, int month, int dow)
 {
