@@ -7,7 +7,7 @@
   A work in progress.
 
 */
-#define DEBUG  // Un-comment to turn on debug
+//#define DEBUG  // Un-comment to turn on debug
 
 #include <Wire.h>
 #include "ds3231.h"
