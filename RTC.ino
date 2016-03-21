@@ -32,9 +32,6 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 #define BUTTON_DOWN               3
 #define BUTTON_LEFT               4
 #define BUTTON_SELECT             5
-//#define LED_RED                   13
-//#define LED_GREEN                 4
-//#define LED_BLUE                  10
 
 uint8_t time[8];
 char recv[BUFF_MAX];
@@ -44,6 +41,7 @@ byte buttonJustPressed  = false;         //this will be true after a ReadButtons
 byte buttonJustReleased = false;         //this will be true after a ReadButtons() call if triggered
 byte buttonWas          = BUTTON_NONE;   //used by ReadButtons() for detection of button events
 
+// Set up the one time stuff
 void setup()
 {
 #ifdef DEBUG
@@ -55,12 +53,6 @@ void setup()
   //lcd backlight control
   pinMode( LCD_BACKLIGHT_PIN, OUTPUT );     //D10 is an output
   digitalWrite( LCD_BACKLIGHT_PIN, HIGH );  //backlight control pin D10 is high (on)
-  //  pinMode(LED_RED, OUTPUT );     //Red LED
-  //  pinMode(LED_GREEN, OUTPUT );   //Green LED
-  //  pinMode(LED_BLUE, OUTPUT );    //Blue LED
-  //  digitalWrite(LED_RED, HIGH);
-  //  digitalWrite(LED_GREEN, LOW);
-  //  digitalWrite(LED_BLUE, LOW );
 
   Wire.begin();
   DS3231_init(DS3231_INTCN);
@@ -75,6 +67,12 @@ void setup()
   //  Serial.println("Setting time");
   //    parse_cmd("T005911020032016", 16);
   //                ssmmhhWDDMMYYYY
+
+  lcd.setCursor(6, 0);
+  lcd.print("RTC");
+  lcd.setCursor(2, 1);
+  lcd.print("Gary Grotsky");
+  delay (5000);
 }
 
 void loop()
@@ -273,15 +271,13 @@ void loop()
     }
   }
 }
+
 void parse_cmd(char *cmd, int cmdsize)
 {
   uint8_t i;
   uint8_t reg_val;
   char buff[BUFF_MAX];
   struct ts t;
-
-  //snprintf(buff, BUFF_MAX, "cmd was '%s' %d\n", cmd, cmdsize);
-  //Serial.print(buff);
 
   // TssmmhhWDDMMYYYY aka set time
   if (cmd[0] == 84 && cmdsize == 16) {
@@ -447,8 +443,9 @@ byte ReadButtons()
   return ( button );
 }
 
-// Check to see if it's DST
-// http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
+/* Check to see if it's DST
+ http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
+*/
 bool IsDST(int day, int month, int dow)
 {
   //January, february, and december are out.
