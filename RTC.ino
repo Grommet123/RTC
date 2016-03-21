@@ -90,7 +90,7 @@ void loop()
   static bool buttonSelect = true;
   static bool buttonRight = true;
   static bool buttonLeft = false;
-  static bool pastButtonSelect = true;
+  static bool pastButtonSelect = false;
   char fc;
   char AMPM;
 
@@ -135,7 +135,8 @@ void loop()
       }
     case BUTTON_SELECT:
       {
-        buttonSelect = !buttonSelect;
+        buttonSelect = pastButtonSelect;
+        pastButtonSelect = !buttonSelect;
         buttonLeft = false;
         delay (500);
         break;
