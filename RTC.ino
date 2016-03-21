@@ -121,6 +121,7 @@ void loop()
       }
     case BUTTON_DOWN:
       {
+        //        Not ueed for now
         break;
       }
     case BUTTON_LEFT:
@@ -172,6 +173,7 @@ void loop()
     else {
       dtostrf(temperature, 4, 1, tempF);
     }
+    
 #ifdef DEBUG
     if (t.mon < 10)
       Serial.print('0');
