@@ -7,7 +7,7 @@
   A work in progress.
 
 */
-//#define DEBUG  // Un-comment to turn on debug
+#define DEBUG  // Un-comment to turn on debug
 
 #include <Wire.h>
 #include "ds3231.h"
@@ -63,9 +63,11 @@ void setup() {
   lcd.begin(16, 2);
   lcd.clear();
   // Used to set the clock one time
-//    Serial.println("Setting time");
-//    parse_cmd("T000310321032016", 16);
-//              ssmmhhWDDMMYYYY
+#ifdef DEBUG
+  Serial.println("Setting time");
+#endif
+//  parse_cmd("T002112321032016", 16);
+  //          ssmmhhWDDMMYYYY
 
   // Desplay splash screen for 5 seconds
   lcd.setCursor(6, 0);
@@ -151,8 +153,8 @@ void loop()
   if ((now - prev > interval) && (Serial.available() <= 0)) {
     DS3231_get(&t); //Get time
     // Check for DST
-    if ((IsDST(t.mday, t.mon, t.wday))) {
-      --t.hour;
+    if (!IsDST(t.mday, t.mon, t.wday)) {
+      --t.hour; // DST set clock back 1 hour
 #ifdef DEBUG
       Serial.println("It is DST");
       Serial.println();
@@ -220,7 +222,14 @@ void loop()
     }
     else {
       lcd.clear();
-      lcd.setCursor(1, 0);
+
+      // Compensate for the long spelling months
+      if ((t.mon == 9) || (t.mon == 11) || (t.mon == 12)) {
+        lcd.setCursor(0, 0);
+      }
+      else {
+        lcd.setCursor(1, 0);
+      }
 
       lcd.print(t.mday);
 
@@ -379,15 +388,15 @@ void printMonth(int month)
 {
   switch (month)
   {
-    case 1: lcd.print(" January "); break;
-    case 2: lcd.print(" February "); break;
-    case 3: lcd.print(" March "); break;
-    case 4: lcd.print(" April "); break;
-    case 5: lcd.print(" May "); break;
-    case 6: lcd.print(" June "); break;
-    case 7: lcd.print(" July "); break;
-    case 8: lcd.print(" August "); break;
-    case 9: lcd.print(" September "); break;
+    case 1:  lcd.print(" January "); break;
+    case 2:  lcd.print(" February "); break;
+    case 3:  lcd.print(" March "); break;
+    case 4:  lcd.print(" April "); break;
+    case 5:  lcd.print(" May "); break;
+    case 6:  lcd.print(" June "); break;
+    case 7:  lcd.print(" July "); break;
+    case 8:  lcd.print(" August "); break;
+    case 9:  lcd.print(" September"); break; // To long to fit with space on 16 char display
     case 10: lcd.print(" October "); break;
     case 11: lcd.print(" November "); break;
     case 12: lcd.print(" December "); break;
