@@ -32,6 +32,9 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 #define BUTTON_DOWN               3
 #define BUTTON_LEFT               4
 #define BUTTON_SELECT             5
+#define SEP                       9
+#define NOV                       10
+#define DEC                       12
 
 uint8_t time[8];
 char recv[BUFF_MAX];
@@ -224,7 +227,7 @@ void loop()
       lcd.clear();
 
       // Compensate for the long spelling months
-      if ((t.mon == 9) || (t.mon == 11) || (t.mon == 12)) {
+      if ((t.mon == SEP) || (t.mon == NOV) || (t.mon == DEC)) {
         lcd.setCursor(0, 0);
       }
       else {
