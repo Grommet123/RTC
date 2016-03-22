@@ -32,6 +32,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 #define BUTTON_DOWN               3
 #define BUTTON_LEFT               4
 #define BUTTON_SELECT             5
+// Used to check the long spelling months
 #define SEP                       9
 #define NOV                       10
 #define DEC                       12
@@ -65,6 +66,7 @@ void setup() {
 
   lcd.begin(16, 2);
   lcd.clear();
+  
   // Used to set the clock one time
 #ifdef DEBUG
   Serial.println("Setting time");
@@ -112,10 +114,10 @@ void loop()
         //RIGHT is a special case, it turns the LCD backlight off and on
         buttonRight = !buttonRight;
         if (!buttonRight) {
-          digitalWrite( LCD_BACKLIGHT_PIN, LOW );    //Turn on backlight
+          digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn on backlight
         }
         else {
-          digitalWrite( LCD_BACKLIGHT_PIN, HIGH );   //Turn off backlight
+          digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn off backlight
         }
         delay (500);
         break;
@@ -157,20 +159,21 @@ void loop()
     DS3231_get(&t); //Get time
     // Check for DST
     if (!IsDST(t.mday, t.mon, t.wday)) {
-      --t.hour; //Not DST set clock back 1 hour
+      --t.hour; //Not DST, set clock back 1 hour
 #ifdef DEBUG
       Serial.println("It is DST");
       Serial.println();
 #endif
     }
+    // Get the temperature from the RTC chip
     parse_cmd("C", 1);
     temperature = DS3231_get_treg(); //Get temperature
-
+    // If Selcet button pressed, convert to F
     if (buttonSelect) {
       temperature = (temperature * 9 / 5) + 32; //(C * 9/5) +32 = F
       fc = 'F';
     }
-    else {
+    else { // Leave it in C
       fc = 'C';
     }
     if (buttonSelect) {
@@ -181,6 +184,7 @@ void loop()
     }
 
 #ifdef DEBUG
+//  Display to serial monitor
     if (t.mon < 10)
       Serial.print('0');
     Serial.print(t.mon);
@@ -207,7 +211,7 @@ void loop()
     Serial.println(t.wday);
 #endif
 
-    // This is where the LCD display is handled
+    // This is where the LCD display is handled (the code speaks for its self :-)
     if (buttonLeft) {
       lcd.clear();
       if ((IsDST(t.mday, t.mon, t.wday))) {
@@ -288,7 +292,7 @@ void loop()
 }
 
 /*
-   Parse command
+*  Parse command
 */
 void parse_cmd(char *cmd, int cmdsize)
 {
@@ -385,7 +389,7 @@ void parse_cmd(char *cmd, int cmdsize)
 }
 
 /*
-   Print the month as a word
+*  Print the month as a word
 */
 void printMonth(int month)
 {
@@ -399,7 +403,7 @@ void printMonth(int month)
     case 6:  lcd.print(" June "); break;
     case 7:  lcd.print(" July "); break;
     case 8:  lcd.print(" August "); break;
-    case 9:  lcd.print(" September"); break; // To long to fit with space on 16 char display
+    case 9:  lcd.print(" September"); break; // To long to fit with a space on 16 char display
     case 10: lcd.print(" October "); break;
     case 11: lcd.print(" November "); break;
     case 12: lcd.print(" December "); break;
@@ -407,11 +411,10 @@ void printMonth(int month)
   }
 }
 
-/*--------------------------------------------------------------------------------------
-  ReadButtons()
-  Detect the button pressed and return the value
-  Uses global values buttonWas, buttonJustPressed, buttonJustReleased.
-  --------------------------------------------------------------------------------------*/
+/*
+*  Detect the button pressed and return the value
+*  Uses global values buttonWas, buttonJustPressed, buttonJustReleased.
+*/
 byte ReadButtons()
 {
   unsigned int buttonVoltage;
@@ -458,7 +461,7 @@ byte ReadButtons()
 }
 
 /* Check to see if it's DST
-  http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
+*  http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
 */
 bool IsDST(int day, int month, int dow)
 {
