@@ -66,19 +66,16 @@ void setup() {
 
   lcd.begin(16, 2);
   lcd.clear();
-  
+
   // Used to set the clock one time
 #ifdef DEBUG
   Serial.println("Setting time");
 #endif
-//  parse_cmd("T002112321032016", 16);
+  //  parse_cmd("T002112321032016", 16);
   //          ssmmhhWDDMMYYYY
 
   // Desplay splash screen for 5 seconds
-  lcd.setCursor(6, 0);
-  lcd.print("RTC");
-  lcd.setCursor(2, 1);
-  lcd.print("Gary Grotsky");
+  DisplaySplashScreen();
   delay (5000);
 }
 
@@ -94,9 +91,10 @@ void loop()
   byte button;
   byte timestamp;
   static bool buttonSelect = true;
+  static bool pastButtonSelect = false;
   static bool buttonRight = true;
   static bool buttonLeft = false;
-  static bool pastButtonSelect = false;
+  static bool buttonDown = false;
   char fc;
   char AMPM;
 
@@ -111,7 +109,7 @@ void loop()
       }
     case BUTTON_RIGHT:
       {
-        //RIGHT is a special case, it turns the LCD backlight off and on
+        //RIGHT turns the LCD backlight off and on
         buttonRight = !buttonRight;
         if (!buttonRight) {
           digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn on backlight
@@ -129,22 +127,30 @@ void loop()
       }
     case BUTTON_DOWN:
       {
-        //        Not used for now
+        //DOWN displays the splash screen
+        lcd.clear();
+        buttonDown = !buttonDown;
+        pastButtonSelect = buttonSelect;
+        buttonLeft = false;
+        delay (500);
         break;
       }
     case BUTTON_LEFT:
       {
-        //LEFT is a special case, it displays DST and DOW
+        //LEFT displays DST and DOW
         buttonLeft = !buttonLeft;
+        buttonDown = false;
         pastButtonSelect = buttonSelect;
         delay (500);
         break;
       }
     case BUTTON_SELECT:
       {
+        //SELECT displays the time, date and temp
         buttonSelect = pastButtonSelect;
         pastButtonSelect = !buttonSelect;
         buttonLeft = false;
+        buttonDown = false;
         delay (500);
         break;
       }
@@ -184,7 +190,7 @@ void loop()
     }
 
 #ifdef DEBUG
-//  Display to serial monitor
+    //  Display to serial monitor
     if (t.mon < 10)
       Serial.print('0');
     Serial.print(t.mon);
@@ -211,88 +217,93 @@ void loop()
     Serial.println(t.wday);
 #endif
 
-    // This is where the LCD display is handled (the code speaks for its self :-)
-    if (buttonLeft) {
-      lcd.clear();
-      if ((IsDST(t.mday, t.mon, t.wday))) {
-        lcd.setCursor(0, 0);
-        lcd.print("It is DST");
-      }
-      else {
-        lcd.setCursor(0, 0);
-        lcd.print("It is not DST");
-      }
-      lcd.setCursor(0, 1);
-      lcd.print("DOW = ");
-      lcd.print(t.wday);
-      prev = now;
+    // This is where the LCD display is handled (the code speaks for its self :-))
+    if (buttonDown) {
+      DisplaySplashScreen();
     }
     else {
-      lcd.clear();
-
-      // Compensate for the long spelling months
-      if ((t.mon == SEP) || (t.mon == NOV) || (t.mon == DEC)) {
-        lcd.setCursor(0, 0);
-      }
-      else {
-        lcd.setCursor(1, 0);
-      }
-
-      lcd.print(t.mday);
-
-      printMonth(t.mon);
-
-      lcd.print(t.year);
-
-      lcd.setCursor(0, 1); //Go to second line of the LCD Screen
-
-      if (buttonSelect) {
-
-        if (t.hour >= 12) {
-          if (t.hour > 12) {
-            t.hour -= 12;
-          }
-          AMPM = 'P';
+      if (buttonLeft) {
+        lcd.clear();
+        if ((IsDST(t.mday, t.mon, t.wday))) {
+          lcd.setCursor(0, 0);
+          lcd.print("It is DST");
         }
         else {
-          AMPM = 'A';
+          lcd.setCursor(0, 0);
+          lcd.print("It is not DST");
         }
-      }
-
-      if (t.hour < 10)
-      {
-        lcd.print("0");
-      }
-      lcd.print(t.hour);
-      lcd.print(":");
-      if (t.min < 10)
-      {
-        lcd.print("0");
-      }
-      lcd.print(t.min);
-      lcd.print(":");
-      if (t.sec < 10)
-      {
-        lcd.print("0");
-      }
-      lcd.print(t.sec);
-      if (buttonSelect) {
-        lcd.print(AMPM);
+        lcd.setCursor(0, 1);
+        lcd.print("DOW = ");
+        lcd.print(t.wday);
+        prev = now;
       }
       else {
-        lcd.print("  ");
+        lcd.clear();
+
+        // Compensate for the long spelling months
+        if ((t.mon == SEP) || (t.mon == NOV) || (t.mon == DEC)) {
+          lcd.setCursor(0, 0);
+        }
+        else {
+          lcd.setCursor(1, 0);
+        }
+
+        lcd.print(t.mday);
+
+        printMonth(t.mon);
+
+        lcd.print(t.year);
+
+        lcd.setCursor(0, 1); //Go to second line of the LCD Screen
+
+        if (buttonSelect) {
+
+          if (t.hour >= 12) {
+            if (t.hour > 12) {
+              t.hour -= 12;
+            }
+            AMPM = 'P';
+          }
+          else {
+            AMPM = 'A';
+          }
+        }
+
+        if (t.hour < 10)
+        {
+          lcd.print("0");
+        }
+        lcd.print(t.hour);
+        lcd.print(":");
+        if (t.min < 10)
+        {
+          lcd.print("0");
+        }
+        lcd.print(t.min);
+        lcd.print(":");
+        if (t.sec < 10)
+        {
+          lcd.print("0");
+        }
+        lcd.print(t.sec);
+        if (buttonSelect) {
+          lcd.print(AMPM);
+        }
+        else {
+          lcd.print("  ");
+        }
+        //    lcd.print(' ');
+        lcd.print(tempF);
+        lcd.print((char)223);
+        lcd.print(fc);
+        prev = now;
       }
-      //    lcd.print(' ');
-      lcd.print(tempF);
-      lcd.print((char)223);
-      lcd.print(fc);
-      prev = now;
     }
   }
 }
 
 /*
-*  Parse command
+   Parse command
 */
 void parse_cmd(char *cmd, int cmdsize)
 {
@@ -389,7 +400,7 @@ void parse_cmd(char *cmd, int cmdsize)
 }
 
 /*
-*  Print the month as a word
+   Print the month as a word
 */
 void printMonth(int month)
 {
@@ -412,8 +423,8 @@ void printMonth(int month)
 }
 
 /*
-*  Detect the button pressed and return the value
-*  Uses global values buttonWas, buttonJustPressed, buttonJustReleased.
+   Detect the button pressed and return the value
+   Uses global values buttonWas, buttonJustPressed, buttonJustReleased.
 */
 byte ReadButtons()
 {
@@ -461,7 +472,7 @@ byte ReadButtons()
 }
 
 /* Check to see if it's DST
-*  http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
+   http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
 */
 bool IsDST(int day, int month, int dow)
 {
@@ -481,4 +492,12 @@ bool IsDST(int day, int month, int dow)
   //In november we must be before the first sunday to be dst.
   //That means the previous sunday must be before the 1st.
   return previousSunday <= 0;
+}
+
+//Display splash screen
+void DisplaySplashScreen() {
+  lcd.setCursor(6, 0);
+  lcd.print("RTC");
+  lcd.setCursor(2, 1);
+  lcd.print("Gary Grotsky");
 }
