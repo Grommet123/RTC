@@ -15,7 +15,7 @@
 
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
-#define REVISION                 "V1.0"
+#define VERSION                 "V1.0"
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // A0 is the button ADC input
 #define LCD_BACKLIGHT_PIN        10  // D10 controls LCD backlight
@@ -215,6 +215,7 @@ void loop()
     Serial.println();
     Serial.print("DOW = ");
     Serial.println(t.wday);
+	Serial.println();
 #endif
 
     // This is where the LCD display is handled (the code speaks for its self :-))
@@ -499,7 +500,7 @@ void DisplaySplashScreen() {
   lcd.setCursor(6, 0);
   lcd.print("RTC");
   lcd.setCursor(12, 0);
-  lcd.print(REVISION);
+  lcd.print(VERSION);
   lcd.setCursor(2, 1);
   lcd.print("Gary Grotsky");
 }
