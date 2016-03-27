@@ -15,6 +15,7 @@
 
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
+#define REVISION                 "V1.0"
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // A0 is the button ADC input
 #define LCD_BACKLIGHT_PIN        10  // D10 controls LCD backlight
@@ -47,16 +48,15 @@ byte buttonWas          = BUTTON_NONE;   //used by ReadButtons() for detection o
 
 // Set up the one time stuff
 void setup() {
-#ifdef DEBUG
-  Serial.begin(9600);
-#endif
   //button adc input
   pinMode(BUTTON_ADC_PIN, INPUT);         //ensure A0 is an input
   digitalWrite(BUTTON_ADC_PIN, LOW);      //ensure pullup is off on A0
   //lcd backlight control
   pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //D10 is an output
   digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //backlight control pin D10 is high (on)
-
+#ifdef DEBUG
+  Serial.begin(9600);
+#endif
   Wire.begin();
   DS3231_init(DS3231_INTCN);
   memset(recv, 0, BUFF_MAX);
@@ -498,6 +498,8 @@ bool IsDST(int day, int month, int dow)
 void DisplaySplashScreen() {
   lcd.setCursor(6, 0);
   lcd.print("RTC");
+  lcd.setCursor(12, 0);
+  lcd.print(REVISION);
   lcd.setCursor(2, 1);
   lcd.print("Gary Grotsky");
 }
