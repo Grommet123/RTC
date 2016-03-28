@@ -12,12 +12,13 @@
 #include <Wire.h>
 #include "ds3231.h"
 #include <LiquidCrystal.h>
-
+#include <dht.h>
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
-#define VERSION                 "V1.0"
+#define VERSION                 "V2.0" // Added DHT11 Temperature Humidity Sensor Module
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // A0 is the button ADC input
+#define HUMDTIDY_PIN             A1  // A1 is the button humidity input
 #define LCD_BACKLIGHT_PIN        10  // D10 controls LCD backlight
 // ADC readings expected for the 5 buttons on the ADC input
 #define RIGHT_10BIT_ADC           0  // right
@@ -45,6 +46,7 @@ unsigned long prev, interval = 1000;
 byte buttonJustPressed  = false;         //this will be true after a ReadButtons() call if triggered
 byte buttonJustReleased = false;         //this will be true after a ReadButtons() call if triggered
 byte buttonWas          = BUTTON_NONE;   //used by ReadButtons() for detection of button events
+dht DHT;
 
 // Set up the one time stuff
 void setup() {
@@ -95,6 +97,7 @@ void loop()
   static bool buttonRight = true;
   static bool buttonLeft = false;
   static bool buttonDown = false;
+  static bool buttonUp = false;
   char fc;
   char AMPM;
 
@@ -122,7 +125,12 @@ void loop()
       }
     case BUTTON_UP:
       {
-        //        Not used for now
+        //UP displays Humidity
+        buttonUp = !buttonUp;
+        pastButtonSelect = buttonSelect;
+        buttonDown = false;
+        buttonLeft = false;
+        delay (500);
         break;
       }
     case BUTTON_DOWN:
@@ -132,6 +140,7 @@ void loop()
         buttonDown = !buttonDown;
         pastButtonSelect = buttonSelect;
         buttonLeft = false;
+        buttonUp = false;
         delay (500);
         break;
       }
@@ -140,6 +149,7 @@ void loop()
         //LEFT displays DST and DOW
         buttonLeft = !buttonLeft;
         buttonDown = false;
+        buttonUp = false;
         pastButtonSelect = buttonSelect;
         delay (500);
         break;
@@ -151,6 +161,7 @@ void loop()
         pastButtonSelect = !buttonSelect;
         buttonLeft = false;
         buttonDown = false;
+        buttonUp = false;
         delay (500);
         break;
       }
@@ -171,6 +182,8 @@ void loop()
       Serial.println();
 #endif
     }
+    // Get the humdtidy the DHT11 Temperature Humidity Sensor Module
+    DHT.read11(HUMDTIDY_PIN);
     // Get the temperature from the RTC chip
     parse_cmd("C", 1);
     temperature = DS3231_get_treg(); //Get temperature
@@ -215,12 +228,22 @@ void loop()
     Serial.println();
     Serial.print("DOW = ");
     Serial.println(t.wday);
-	Serial.println();
+    Serial.print("Humidity = ");
+    Serial.println(DHT.humidity);
+    Serial.println();
 #endif
 
     // This is where the LCD display is handled (the code speaks for its self :-))
     if (buttonDown) {
       DisplaySplashScreen();
+    }
+    else if (buttonUp) {
+      lcd.clear();
+      lcd.setCursor(2, 0);
+      lcd.print("Rel Humidity");
+      lcd.setCursor(5, 1);
+      lcd.print(DHT.humidity);
+      lcd.print("%");
     }
     else {
       if (buttonLeft) {
