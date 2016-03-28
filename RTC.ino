@@ -7,7 +7,7 @@
   A work in progress.
 
 */
-//#define DEBUG  // Un-comment to turn on debug
+//#define DEBUG  // Uncomment to turn on debug
 
 #define  DHT11_PRESENT
 
@@ -17,11 +17,13 @@
 #include <dht.h>
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
-#define VERSION                 "V2.1" // Added the DHT11 temperature humidity sensor module
+#define VERSION                 "V2.2" // Add temperature and humidity offset
+#define TEMPERATURE_OFFSET       3.0   // DHT11 reads high (Cheep Chinese garbage)
+#define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // A0 is the button ADC input
 #define TEMP_HUM_PIN             A1  // A1 is the button humidity input
-#define LCD_BACKLIGHT_PIN        10  // D10 controls LCD backlight
+#define LCD_BACKLIGHT_PIN        10  // D10 controls LCD back light
 // ADC readings expected for the 5 buttons on the ADC input
 #define RIGHT_10BIT_ADC           0  // right
 #define UP_10BIT_ADC            131  // up
@@ -54,10 +56,10 @@ dht DHT;
 void setup() {
   //button adc input
   pinMode(BUTTON_ADC_PIN, INPUT);         //ensure A0 is an input
-  digitalWrite(BUTTON_ADC_PIN, LOW);      //ensure pullup is off on A0
+  digitalWrite(BUTTON_ADC_PIN, LOW);      //ensure pull up is off on A0
   //lcd backlight control
   pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //D10 is an output
-  digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //backlight control pin D10 is high (on)
+  digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //back light control pin D10 is high (on)
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
@@ -78,7 +80,7 @@ void setup() {
   //  parse_cmd("T002112321032016", 16);
   //          ssmmhhWDDMMYYYY
 
-  // Desplay splash screen for 5 seconds
+  // Display splash screen for 5 seconds
   DisplaySplashScreen();
   delay (5000);
 }
@@ -118,10 +120,10 @@ void loop()
         //RIGHT turns the LCD backlight off and on
         buttonRight = !buttonRight;
         if (!buttonRight) {
-          digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn on backlight
+          digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn on back light
         }
         else {
-          digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn off backlight
+          digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn off back light
         }
         delay (500);
         break;
@@ -189,8 +191,8 @@ void loop()
 #ifdef DHT11_PRESENT
     // Get the temperature and humidity from the DHT11 temperature humidity sensor module
     DHT.read11(TEMP_HUM_PIN);
-    temperature = DHT.temperature;
-    humidity = DHT.humidity;
+    temperature = DHT.temperature - TEMPERATURE_OFFSET;
+    humidity = DHT.humidity + HUMIDITY_OFFSET;
 #else
     // Get the temperature from the RTC chip. It does not supply humidity
     parse_cmd("C", 1);
@@ -198,7 +200,7 @@ void loop()
     humidity = 0.0;
 #endif
 
-    // If Selcet button pressed, convert to F
+    // If Select button pressed, convert to F
     if (buttonSelect) {
       temperature = (temperature * 9 / 5) + 32; //(C * 9/5) +32 = F
       fc = 'F';
@@ -405,7 +407,7 @@ void parse_cmd(char *cmd, int cmdsize)
 #ifdef DEBUG
     Serial.print("temperature is ");
     Serial.print((DS3231_get_treg() * 9 / 5) + 32, DEC); // F = (C* 9/5) + 32
-    Serial.println(" Degrees Farenheit");
+    Serial.println(" Degrees Fahrenheit");
 #endif
   } else if (cmd[0] == 68 && cmdsize == 1) {  // "D" - reset status register alarm flags
     reg_val = DS3231_get_sreg();
@@ -512,7 +514,7 @@ byte ReadButtons()
 */
 bool IsDST(int day, int month, int dow)
 {
-  //January, february, and december are out.
+  //January, February, and December are out.
   if (month < 3 || month > 11) {
     return false;
   }
@@ -521,12 +523,12 @@ bool IsDST(int day, int month, int dow)
     return true;
   }
   int previousSunday = day - dow;
-  //In march, we are DST if our previous sunday was on or after the 8th.
+  //In march, we are DST if our previous Sunday was on or after the 8th.
   if (month == 3) {
     return previousSunday >= 8;
   }
-  //In november we must be before the first sunday to be dst.
-  //That means the previous sunday must be before the 1st.
+  //In November we must be before the first Sunday to be DST.
+  //That means the previous Sunday must be before the 1st.
   return previousSunday <= 0;
 }
 
