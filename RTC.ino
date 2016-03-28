@@ -9,16 +9,18 @@
 */
 //#define DEBUG  // Un-comment to turn on debug
 
+#define  DHT11_PRESENT
+
 #include <Wire.h>
 #include "ds3231.h"
 #include <LiquidCrystal.h>
 #include <dht.h>
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
-#define VERSION                 "V2.0" // Added DHT11 Temperature Humidity Sensor Module
+#define VERSION                 "V2.1" // Added the DHT11 temperature humidity sensor module
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // A0 is the button ADC input
-#define HUMDTIDY_PIN             A1  // A1 is the button humidity input
+#define TEMP_HUM_PIN             A1  // A1 is the button humidity input
 #define LCD_BACKLIGHT_PIN        10  // D10 controls LCD backlight
 // ADC readings expected for the 5 buttons on the ADC input
 #define RIGHT_10BIT_ADC           0  // right
@@ -87,6 +89,7 @@ void loop()
   char in;
   char tempF[6];
   float temperature;
+  double humidity;
   char buff[BUFF_MAX];
   unsigned long now = millis();
   struct ts t;
@@ -182,11 +185,19 @@ void loop()
       Serial.println();
 #endif
     }
-    // Get the humdtidy the DHT11 Temperature Humidity Sensor Module
-    DHT.read11(HUMDTIDY_PIN);
-    // Get the temperature from the RTC chip
+
+#ifdef DHT11_PRESENT
+    // Get the temperature and humidity from the DHT11 temperature humidity sensor module
+    DHT.read11(TEMP_HUM_PIN);
+    temperature = DHT.temperature;
+    humidity = DHT.humidity;
+#else
+    // Get the temperature from the RTC chip. It does not supply humidity
     parse_cmd("C", 1);
-    temperature = DS3231_get_treg(); //Get temperature
+    temperature = DS3231_get_treg();
+    humidity = 0.0;
+#endif
+
     // If Selcet button pressed, convert to F
     if (buttonSelect) {
       temperature = (temperature * 9 / 5) + 32; //(C * 9/5) +32 = F
@@ -229,7 +240,7 @@ void loop()
     Serial.print("DOW = ");
     Serial.println(t.wday);
     Serial.print("Humidity = ");
-    Serial.println(DHT.humidity);
+    Serial.println(humidity);
     Serial.println();
 #endif
 
@@ -242,8 +253,9 @@ void loop()
       lcd.setCursor(2, 0);
       lcd.print("Rel Humidity");
       lcd.setCursor(5, 1);
-      lcd.print(DHT.humidity);
+      lcd.print(humidity);
       lcd.print("%");
+      prev = now;
     }
     else {
       if (buttonLeft) {
@@ -327,7 +339,7 @@ void loop()
 }
 
 /*
-   Parse command
+  Parse command
 */
 void parse_cmd(char *cmd, int cmdsize)
 {
@@ -424,7 +436,7 @@ void parse_cmd(char *cmd, int cmdsize)
 }
 
 /*
-   Print the month as a word
+  Print the month as a word
 */
 void printMonth(int month)
 {
@@ -447,8 +459,8 @@ void printMonth(int month)
 }
 
 /*
-   Detect the button pressed and return the value
-   Uses global values buttonWas, buttonJustPressed, buttonJustReleased.
+  Detect the button pressed and return the value
+  Uses global values buttonWas, buttonJustPressed, buttonJustReleased.
 */
 byte ReadButtons()
 {
@@ -496,7 +508,7 @@ byte ReadButtons()
 }
 
 /* Check to see if it's DST
-   http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
+  http://stackoverflow.com/questions/5590429/calculating-daylight-saving-time-from-only-date
 */
 bool IsDST(int day, int month, int dow)
 {
