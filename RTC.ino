@@ -6,6 +6,8 @@
 
   A work in progress.
 
+  https://github.com/Grommet123/RTC
+
 */
 
 #include "RTC.h"
@@ -14,7 +16,8 @@
 #include <LiquidCrystal.h>
 #include <dht.h>
 
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7); //(rs, enable, d0, d1, d2, d3)
+dht DHT;
 
 uint8_t time[8];
 char recv[BUFF_MAX];
@@ -23,7 +26,6 @@ unsigned long prev, interval = 1000;
 byte buttonJustPressed  = false;         //this will be true after a ReadButtons() call if triggered
 byte buttonJustReleased = false;         //this will be true after a ReadButtons() call if triggered
 byte buttonWas          = BUTTON_NONE;   //used by ReadButtons() for detection of button events
-dht DHT;
 
 // Set up the one time stuff
 void setup() {
@@ -177,14 +179,10 @@ void loop()
     if (buttonSelect) {
       temperature = (temperature * 9 / 5) + 32; //(C * 9/5) +32 = F
       fc = 'F';
+      dtostrf(temperature, 5, 1, tempF);
     }
     else { // Leave it in C
       fc = 'C';
-    }
-    if (buttonSelect) {
-      dtostrf(temperature, 5, 1, tempF);
-    }
-    else {
       dtostrf(temperature, 4, 1, tempF);
     }
 
