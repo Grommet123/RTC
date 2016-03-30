@@ -13,7 +13,7 @@
 
 #define  DHT11_PRESENT
 
-#define VERSION                 "V2.4" // Add RTC.h file
+#define VERSION                 "V1.0" // Initial Release
 #define TEMPERATURE_OFFSET       1.8   // DHT11 reads high (Cheep Chinese garbage)
 #define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
 #define BUFF_MAX 128
@@ -40,4 +40,3 @@
 #define DEC                       12
 
 #endif
-
