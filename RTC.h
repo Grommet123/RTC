@@ -8,6 +8,7 @@
 
 #ifndef RTC_h
 #define RTC_h
+#include "Arduino.h"
 
 //#define DEBUG  // Uncomment to turn on debug
 
@@ -38,5 +39,11 @@
 #define SEP                       9
 #define NOV                       10
 #define DEC                       12
+
+void parse_cmd(char *cmd, int cmdsize);
+void printMonth(int month);
+byte ReadButtons();
+bool IsDST(int day, int month, int dow);
+void DisplaySplashScreen();
 
 #endif
