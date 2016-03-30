@@ -504,7 +504,8 @@ bool IsDST(int day, int month, int dow)
 }
 
 //Display splash screen
-void DisplaySplashScreen() {
+void DisplaySplashScreen()
+{
   lcd.setCursor(6, 0);
   lcd.print("RTC");
   lcd.setCursor(12, 0);
