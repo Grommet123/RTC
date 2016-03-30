@@ -16,8 +16,8 @@
 #include <LiquidCrystal.h>
 #include <dht.h>
 
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7); //(rs, enable, d0, d1, d2, d3)
-dht DHT;
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);     //(rs, enable, d0, d1, d2, d3)
+dht DHT;                                 //DHT11 temperature humidity sensor module object
 
 uint8_t time[8];
 char recv[BUFF_MAX];
