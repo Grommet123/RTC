@@ -78,6 +78,7 @@ void loop()
   static bool buttonLeft = false;
   static bool buttonDown = false;
   static bool buttonUp = false;
+  static unsigned int shutDownTime = 0;
   char fc;
   char AMPM;
 
@@ -92,14 +93,15 @@ void loop()
       }
     case BUTTON_RIGHT:
       {
-        //RIGHT turns the LCD backlight off and on
+        //RIGHT turns the LCD back light off and on
         buttonRight = !buttonRight;
         if (!buttonRight) {
-          digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn on back light
+          digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn off back light
         }
         else {
-          digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn off back light
+          digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         }
+ 		shutDownTime = 0;
         delay (500);
         break;
       }
@@ -110,6 +112,8 @@ void loop()
         pastButtonSelect = buttonSelect;
         buttonDown = false;
         buttonLeft = false;
+		shutDownTime = 0;
+        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -121,6 +125,8 @@ void loop()
         pastButtonSelect = buttonSelect;
         buttonLeft = false;
         buttonUp = false;
+		shutDownTime = 0;
+        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -130,7 +136,9 @@ void loop()
         buttonLeft = !buttonLeft;
         buttonDown = false;
         buttonUp = false;
+ 		shutDownTime = 0;
         pastButtonSelect = buttonSelect;
+        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -142,6 +150,8 @@ void loop()
         buttonLeft = false;
         buttonDown = false;
         buttonUp = false;
+ 		shutDownTime = 0;
+        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -151,8 +161,17 @@ void loop()
       }
   }
 
-  // show time once in a while
+  // show time once a second
   if ((now - prev > interval) && (Serial.available() <= 0)) {
+    shutDownTime++;
+#ifdef DEBUG
+Serial.print("shutDownTime = ");
+Serial.println(shutDownTime);
+#endif
+	if (shutDownTime == 60) {
+		digitalWrite(LCD_BACKLIGHT_PIN, LOW);   //Turn off back light
+		shutDownTime = 0;
+	}
     DS3231_get(&t); //Get time
     // Check for DST
     if (!IsDST(t.mday, t.mon, t.wday)) {
