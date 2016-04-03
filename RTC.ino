@@ -78,7 +78,7 @@ void loop()
   static bool buttonLeft = false;
   static bool buttonDown = false;
   static bool buttonUp = false;
-  static unsigned int shutDownTime = 0;
+  static unsigned int shutDownTime = 0;  // Used to shut down the back light
   char fc;
   char AMPM;
 
@@ -101,7 +101,7 @@ void loop()
         else {
           digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         }
- 		shutDownTime = 0;
+        shutDownTime = 0;
         delay (500);
         break;
       }
@@ -112,7 +112,7 @@ void loop()
         pastButtonSelect = buttonSelect;
         buttonDown = false;
         buttonLeft = false;
-		shutDownTime = 0;
+        shutDownTime = 0;
         digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
@@ -125,7 +125,7 @@ void loop()
         pastButtonSelect = buttonSelect;
         buttonLeft = false;
         buttonUp = false;
-		shutDownTime = 0;
+        shutDownTime = 0;
         digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
@@ -136,7 +136,7 @@ void loop()
         buttonLeft = !buttonLeft;
         buttonDown = false;
         buttonUp = false;
- 		shutDownTime = 0;
+        shutDownTime = 0;
         pastButtonSelect = buttonSelect;
         digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
@@ -150,7 +150,7 @@ void loop()
         buttonLeft = false;
         buttonDown = false;
         buttonUp = false;
- 		shutDownTime = 0;
+        shutDownTime = 0;
         digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
@@ -164,20 +164,17 @@ void loop()
   // show time once a second
   if ((now - prev > interval) && (Serial.available() <= 0)) {
     shutDownTime++;
-#ifdef DEBUG
-Serial.print("shutDownTime = ");
-Serial.println(shutDownTime);
-#endif
-	if (shutDownTime == 60) {
-		digitalWrite(LCD_BACKLIGHT_PIN, LOW);   //Turn off back light
-		shutDownTime = 0;
-	}
+    if (shutDownTime >= 60) {
+      digitalWrite(LCD_BACKLIGHT_PIN, LOW);   //Turn off back light
+      shutDownTime = 0;
+      buttonRight = false;
+    }
     DS3231_get(&t); //Get time
     // Check for DST
     if (!IsDST(t.mday, t.mon, t.wday)) {
       --t.hour; //Not DST, set clock back 1 hour
 #ifdef DEBUG
-      Serial.println("It is DST");
+      Serial.println("It is not DST");
       Serial.println();
 #endif
     }
@@ -234,6 +231,8 @@ Serial.println(shutDownTime);
     Serial.print("Humidity = ");
     Serial.println(humidity);
     Serial.println();
+    Serial.print("shutDownTime = ");
+    Serial.println(shutDownTime);
 #endif
 
     // This is where the LCD display is handled (the code speaks for its self :-))
