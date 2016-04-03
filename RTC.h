@@ -14,7 +14,7 @@
 
 #define  DHT11_PRESENT
 
-#define VERSION                 "V2.0" // Add shutDownTime
+#define VERSION                 "V2.1" // Fix bugs associated with shutDownTime
 #define TEMPERATURE_OFFSET       1.8   // DHT11 reads high (Cheep Chinese garbage)
 #define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
 #define BUFF_MAX 128
