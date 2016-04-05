@@ -33,11 +33,8 @@ void setup() {
   pinMode(BUTTON_ADC_PIN, INPUT);         //ensure A0 is an input
   digitalWrite(BUTTON_ADC_PIN, LOW);      //ensure pull up is off on A0
   //lcd backlight control
-  pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //back light is an output
-  digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //back light control pin is high (on)
-  pinMode(RED_LED, OUTPUT);               //red LED is an output
-  pinMode(GREEN_LED, OUTPUT);             //green LED is an output
-  pinMode(BLUE_LED, OUTPUT);              //blue LED is an output
+  pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //D10 is an output
+  digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //back light control pin D10 is high (on)
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
@@ -70,7 +67,6 @@ void loop()
   char tempF[6];
   float temperature;
   double humidity;
-  float fahrenheit;
   char buff[BUFF_MAX];
   unsigned long now = millis();
   struct ts t;
@@ -82,7 +78,6 @@ void loop()
   static bool buttonLeft = false;
   static bool buttonDown = false;
   static bool buttonUp = false;
-  static unsigned int shutDownTime = 0;  // Used to shut down the back light
   char fc;
   char AMPM;
 
@@ -97,15 +92,14 @@ void loop()
       }
     case BUTTON_RIGHT:
       {
-        //RIGHT turns the LCD back light off and on
+        //RIGHT turns the LCD backlight off and on
         buttonRight = !buttonRight;
         if (!buttonRight) {
-          digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn off back light
+          digitalWrite(LCD_BACKLIGHT_PIN, LOW);    //Turn on back light
         }
         else {
-          digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
+          digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn off back light
         }
-        shutDownTime = 0;
         delay (500);
         break;
       }
@@ -116,8 +110,6 @@ void loop()
         pastButtonSelect = buttonSelect;
         buttonDown = false;
         buttonLeft = false;
-        shutDownTime = 0;
-        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -129,8 +121,6 @@ void loop()
         pastButtonSelect = buttonSelect;
         buttonLeft = false;
         buttonUp = false;
-        shutDownTime = 0;
-        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -140,9 +130,7 @@ void loop()
         buttonLeft = !buttonLeft;
         buttonDown = false;
         buttonUp = false;
-        shutDownTime = 0;
         pastButtonSelect = buttonSelect;
-        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -154,8 +142,6 @@ void loop()
         buttonLeft = false;
         buttonDown = false;
         buttonUp = false;
-        shutDownTime = 0;
-        digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
       }
@@ -165,20 +151,14 @@ void loop()
       }
   }
 
-  // show time once a second
+  // show time once in a while
   if ((now - prev > interval) && (Serial.available() <= 0)) {
-    shutDownTime++;
-    if (shutDownTime >= 60) {
-      digitalWrite(LCD_BACKLIGHT_PIN, LOW);   //Turn off back light
-      shutDownTime = 0;
-      buttonRight = false;
-    }
     DS3231_get(&t); //Get time
     // Check for DST
     if (!IsDST(t.mday, t.mon, t.wday)) {
       --t.hour; //Not DST, set clock back 1 hour
 #ifdef DEBUG
-      Serial.println("It is not DST");
+      Serial.println("It is DST");
       Serial.println();
 #endif
     }
@@ -194,23 +174,6 @@ void loop()
     temperature = DS3231_get_treg();
     humidity = 0.0;
 #endif
-    // Set the temperature LEDs
-    fahrenheit = (temperature * 9 / 5) + 32;
-	if (fahrenheit <= TEMPERATURE_TO_LOW) {
-		digitalWrite(BLUE_LED, HIGH);
-		digitalWrite(RED_LED, LOW);
-		digitalWrite(GREEN_LED, LOW);
-	}
-	else if (fahrenheit >= TEMPERATURE_TO_HIGH) {
-		digitalWrite(RED_LED, HIGH);
-		digitalWrite(GREEN_LED, LOW);
-		digitalWrite(BLUE_LED, LOW);
-	}
-	else {
-		digitalWrite(GREEN_LED, HIGH);
-		digitalWrite(RED_LED, LOW);
-		digitalWrite(BLUE_LED, LOW);
-	}
 
     // If Select button pressed, convert to F
     if (buttonSelect) {
@@ -252,8 +215,6 @@ void loop()
     Serial.print("Humidity = ");
     Serial.println(humidity);
     Serial.println();
-    Serial.print("shutDownTime = ");
-    Serial.println(shutDownTime);
 #endif
 
     // This is where the LCD display is handled (the code speaks for its self :-))
