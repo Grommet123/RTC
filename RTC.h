@@ -2,7 +2,7 @@
  * RTC.h
  *
  * Created: 3/29/2016 1:50:21 PM
- *  Author: Gary Grotsky
+ *  Author: Gary
  */ 
 
 
@@ -14,7 +14,7 @@
 
 #define  DHT11_PRESENT
 
-#define VERSION                 "V2.1" // Fix bugs associated with shutDownTime
+#define VERSION                 "V1.0" // Initial Release
 #define TEMPERATURE_OFFSET       1.8   // DHT11 reads high (Cheep Chinese garbage)
 #define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
 #define BUFF_MAX 128
