@@ -33,8 +33,11 @@ void setup() {
   pinMode(BUTTON_ADC_PIN, INPUT);         //ensure A0 is an input
   digitalWrite(BUTTON_ADC_PIN, LOW);      //ensure pull up is off on A0
   //lcd backlight control
-  pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //D10 is an output
-  digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //back light control pin D10 is high (on)
+  pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //back light is an output
+  digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //back light control pin is high (on)
+  pinMode(RED_LED, OUTPUT);               //red LED is an output
+  pinMode(GREEN_LED, OUTPUT);             //green LED is an output
+  pinMode(BLUE_LED, OUTPUT);              //blue LED is an output
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
@@ -67,6 +70,7 @@ void loop()
   char tempF[6];
   float temperature;
   double humidity;
+  float fahrenheit;
   char buff[BUFF_MAX];
   unsigned long now = millis();
   struct ts t;
@@ -190,6 +194,23 @@ void loop()
     temperature = DS3231_get_treg();
     humidity = 0.0;
 #endif
+    // Set the temperature LEDs
+    fahrenheit = (temperature * 9 / 5) + 32;
+	if (fahrenheit <= TEMPERATURE_TO_LOW) {
+		digitalWrite(BLUE_LED, HIGH);
+		digitalWrite(RED_LED, LOW);
+		digitalWrite(GREEN_LED, LOW);
+	}
+	else if (fahrenheit >= TEMPERATURE_TO_HIGH) {
+		digitalWrite(RED_LED, HIGH);
+		digitalWrite(GREEN_LED, LOW);
+		digitalWrite(BLUE_LED, LOW);
+	}
+	else {
+		digitalWrite(GREEN_LED, HIGH);
+		digitalWrite(RED_LED, LOW);
+		digitalWrite(BLUE_LED, LOW);
+	}
 
     // If Select button pressed, convert to F
     if (buttonSelect) {
