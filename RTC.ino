@@ -83,6 +83,7 @@ void loop()
   static bool buttonDown = false;
   static bool buttonUp = false;
   static unsigned int shutDownTime = 0;  // Used to shut down the back light
+  static unsigned int blinkTimer = 0;    // Used to flash the red and blue LEDs
   char fc;
   char AMPM;
 
@@ -173,6 +174,7 @@ void loop()
       shutDownTime = 0;
       buttonRight = false;
     }
+    blinkTimer++;
     DS3231_get(&t); //Get time
     // Check for DST
     if (!IsDST(t.mday, t.mon, t.wday)) {
@@ -194,23 +196,37 @@ void loop()
     temperature = DS3231_get_treg();
     humidity = 0.0;
 #endif
-    // Set the temperature LEDs
+    // Set the temperature LEDs.  Blink the trouble ones
     fahrenheit = (temperature * 9 / 5) + 32;
-	if (fahrenheit <= TEMPERATURE_TO_LOW) {
-		digitalWrite(BLUE_LED, HIGH);
-		digitalWrite(RED_LED, LOW);
-		digitalWrite(GREEN_LED, LOW);
-	}
-	else if (fahrenheit >= TEMPERATURE_TO_HIGH) {
-		digitalWrite(RED_LED, HIGH);
-		digitalWrite(GREEN_LED, LOW);
-		digitalWrite(BLUE_LED, LOW);
-	}
-	else {
-		digitalWrite(GREEN_LED, HIGH);
-		digitalWrite(RED_LED, LOW);
-		digitalWrite(BLUE_LED, LOW);
-	}
+    if (fahrenheit < TEMPERATURE_TO_LOW) {
+      if (blinkTimer % 2 == 0) {
+        digitalWrite(BLUE_LED, HIGH);
+        digitalWrite(RED_LED, LOW);
+        digitalWrite(GREEN_LED, LOW);
+      }
+      else {
+        digitalWrite(BLUE_LED, LOW);
+        digitalWrite(RED_LED, LOW);
+        digitalWrite(GREEN_LED, LOW);
+      }
+    }
+    else if (fahrenheit > TEMPERATURE_TO_HIGH) {
+      if (blinkTimer % 2 == 0) {
+        digitalWrite(RED_LED, HIGH);
+        digitalWrite(BLUE_LED, LOW);
+        digitalWrite(GREEN_LED, LOW);
+      }
+      else {
+        digitalWrite(RED_LED, LOW);
+        digitalWrite(BLUE_LED, LOW);
+        digitalWrite(GREEN_LED, LOW);
+      }
+    }
+    else {
+      digitalWrite(GREEN_LED, HIGH);
+      digitalWrite(BLUE_LED, LOW);
+      digitalWrite(RED_LED, LOW);
+    }
 
     // If Select button pressed, convert to F
     if (buttonSelect) {
@@ -251,9 +267,17 @@ void loop()
     Serial.println(t.wday);
     Serial.print("Humidity = ");
     Serial.println(humidity);
-    Serial.println();
+    Serial.print("temperature = ");
+    Serial.println(temperature);
+    Serial.print("blinkTimer = ");
+    Serial.println(blinkTimer);
     Serial.print("shutDownTime = ");
     Serial.println(shutDownTime);
+	Serial.print("blinkTimer = ");
+	Serial.println(blinkTimer);
+	Serial.print("blinkTimer % 2 = ");
+	Serial.println(blinkTimer % 2);
+    Serial.println();
 #endif
 
     // This is where the LCD display is handled (the code speaks for its self :-))
@@ -414,7 +438,7 @@ void parse_cmd(char *cmd, int cmdsize)
     Serial.println(buff);
 #endif
   } else if (cmd[0] == 67 && cmdsize == 1) {  // "C" - get temperature register
-#ifdef DEBUG
+#if 0
     Serial.print("temperature is ");
     Serial.print((DS3231_get_treg() * 9 / 5) + 32, DEC); // F = (C* 9/5) + 32
     Serial.println(" Degrees Fahrenheit");
