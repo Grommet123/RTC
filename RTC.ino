@@ -76,6 +76,7 @@ void loop()
   struct ts t;
   byte button;
   byte timestamp;
+  byte flasher;
   static bool buttonSelect = true;
   static bool pastButtonSelect = false;
   static bool buttonRight = true;
@@ -83,7 +84,7 @@ void loop()
   static bool buttonDown = false;
   static bool buttonUp = false;
   static unsigned int shutDownTime = 0;  // Used to shut down the back light
-  static unsigned int blinkTimer = 0;    // Used to flash the red and blue LEDs
+  static unsigned int flashTimer = 0;    // Used to flash the red and blue LEDs
   char fc;
   char AMPM;
 
@@ -174,7 +175,8 @@ void loop()
       shutDownTime = 0;
       buttonRight = false;
     }
-    blinkTimer++;
+    flashTimer++;
+    flasher = (flashTimer % 2 == 0);
     DS3231_get(&t); //Get time
     // Check for DST
     if (!IsDST(t.mday, t.mon, t.wday)) {
@@ -199,28 +201,14 @@ void loop()
     // Set the temperature LEDs.  Blink the trouble ones
     fahrenheit = (temperature * 9 / 5) + 32;
     if (fahrenheit < TEMPERATURE_TO_LOW) {
-      if (blinkTimer % 2 == 0) {
-        digitalWrite(BLUE_LED, HIGH);
-        digitalWrite(RED_LED, LOW);
-        digitalWrite(GREEN_LED, LOW);
-      }
-      else {
-        digitalWrite(BLUE_LED, LOW);
-        digitalWrite(RED_LED, LOW);
-        digitalWrite(GREEN_LED, LOW);
-      }
+      digitalWrite(BLUE_LED, flasher);
+      digitalWrite(RED_LED, LOW);
+      digitalWrite(GREEN_LED, LOW);
     }
     else if (fahrenheit > TEMPERATURE_TO_HIGH) {
-      if (blinkTimer % 2 == 0) {
-        digitalWrite(RED_LED, HIGH);
-        digitalWrite(BLUE_LED, LOW);
-        digitalWrite(GREEN_LED, LOW);
-      }
-      else {
-        digitalWrite(RED_LED, LOW);
-        digitalWrite(BLUE_LED, LOW);
-        digitalWrite(GREEN_LED, LOW);
-      }
+      digitalWrite(RED_LED, flasher);
+      digitalWrite(BLUE_LED, LOW);
+      digitalWrite(GREEN_LED, LOW);
     }
     else {
       digitalWrite(GREEN_LED, HIGH);
@@ -269,14 +257,14 @@ void loop()
     Serial.println(humidity);
     Serial.print("temperature = ");
     Serial.println(temperature);
-    Serial.print("blinkTimer = ");
-    Serial.println(blinkTimer);
+    Serial.print("flashTimer = ");
+    Serial.println(flashTimer);
     Serial.print("shutDownTime = ");
     Serial.println(shutDownTime);
-	Serial.print("blinkTimer = ");
-	Serial.println(blinkTimer);
-	Serial.print("blinkTimer % 2 = ");
-	Serial.println(blinkTimer % 2);
+    Serial.print("flashTimer = ");
+    Serial.println(flashTimer);
+    Serial.print("flasher = ");
+    Serial.println(flasher);
     Serial.println();
 #endif
 
