@@ -14,7 +14,7 @@
 
 #define  DHT11_PRESENT
 
-#define VERSION                 "V4.0" // Flash the red and blue LEDs
+#define VERSION                 "V4.1" // Minor bug fix
 #define TEMPERATURE_OFFSET       1.8   // DHT11 reads high (Cheep Chinese garbage)
 #define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
 #define BUFF_MAX 128
