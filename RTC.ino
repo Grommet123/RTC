@@ -107,7 +107,10 @@ void loop()
         else {
           digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         }
+        buttonLeft = false;
+        buttonUp = false;
         shutDownTime = 0;
+        pastButtonSelect = buttonSelect;
         delay (500);
         break;
       }
@@ -128,10 +131,10 @@ void loop()
         //DOWN displays the splash screen
         lcd.clear();
         buttonDown = !buttonDown;
-        pastButtonSelect = buttonSelect;
         buttonLeft = false;
         buttonUp = false;
         shutDownTime = 0;
+        pastButtonSelect = buttonSelect;
         digitalWrite(LCD_BACKLIGHT_PIN, HIGH);   //Turn on back light
         delay (500);
         break;
@@ -194,7 +197,9 @@ void loop()
     humidity = DHT.humidity + HUMIDITY_OFFSET;
 #else
     // Get the temperature from the RTC chip. It does not supply humidity
+#ifdef DEBUG
     parse_cmd("C", 1);
+#endif
     temperature = DS3231_get_treg();
     humidity = 0.0;
 #endif
@@ -271,92 +276,88 @@ void loop()
     // This is where the LCD display is handled (the code speaks for its self :-))
     if (buttonDown) {
       DisplaySplashScreen();
-    }
-    else if (buttonUp) {
-      lcd.clear();
-      lcd.setCursor(2, 0);
-      lcd.print("Rel Humidity");
-      lcd.setCursor(5, 1);
-      lcd.print(humidity);
-      lcd.print("%");
       prev = now;
     }
     else {
-      if (buttonLeft) {
+      if (buttonUp) {
         lcd.clear();
-        if ((IsDST(t.mday, t.mon, t.wday))) {
-          lcd.setCursor(0, 0);
-          lcd.print("It is DST");
-        }
-        else {
-          lcd.setCursor(0, 0);
-          lcd.print("It is not DST");
-        }
-        lcd.setCursor(0, 1);
-        lcd.print("DOW = ");
-        lcd.print(t.wday);
+        lcd.setCursor(2, 0);
+        lcd.print("Rel Humidity");
+        lcd.setCursor(5, 1);
+        lcd.print(humidity);
+        lcd.print("%");
         prev = now;
       }
       else {
-        lcd.clear();
-
-        // Compensate for the long spelling months
-        if ((t.mon == SEP) || (t.mon == NOV) || (t.mon == DEC)) {
-          lcd.setCursor(0, 0);
-        }
-        else {
-          lcd.setCursor(1, 0);
-        }
-
-        lcd.print(t.mday);
-
-        printMonth(t.mon);
-
-        lcd.print(t.year);
-
-        lcd.setCursor(0, 1); //Go to second line of the LCD Screen
-
-        if (buttonSelect) {
-
-          if (t.hour >= 12) {
-            if (t.hour > 12) {
-              t.hour -= 12;
-            }
-            AMPM = 'P';
+        if (buttonLeft) {
+          lcd.clear();
+          if ((IsDST(t.mday, t.mon, t.wday))) {
+            lcd.setCursor(0, 0);
+            lcd.print("It is DST");
           }
           else {
-            AMPM = 'A';
+            lcd.setCursor(0, 0);
+            lcd.print("It is not DST");
           }
-        }
-
-        if (t.hour < 10)
-        {
-          lcd.print("0");
-        }
-        lcd.print(t.hour);
-        lcd.print(":");
-        if (t.min < 10)
-        {
-          lcd.print("0");
-        }
-        lcd.print(t.min);
-        lcd.print(":");
-        if (t.sec < 10)
-        {
-          lcd.print("0");
-        }
-        lcd.print(t.sec);
-        if (buttonSelect) {
-          lcd.print(AMPM);
+          lcd.setCursor(0, 1);
+          lcd.print("DOW = ");
+          lcd.print(t.wday);
+          prev = now;
         }
         else {
-          lcd.print("  ");
+          lcd.clear();
+          // Compensate for the long spelling months
+          if ((t.mon == SEP) || (t.mon == NOV) || (t.mon == DEC)) {
+            lcd.setCursor(0, 0);
+          }
+          else {
+            lcd.setCursor(1, 0);
+          }
+          lcd.print(t.mday);
+          printMonth(t.mon);
+          lcd.print(t.year);
+          lcd.setCursor(0, 1); //Go to second line of the LCD Screen
+          if (buttonSelect) {
+            if (t.hour >= 12) {
+              if (t.hour > 12) {
+                t.hour -= 12;
+              }
+              AMPM = 'P';
+            }
+            else {
+              AMPM = 'A';
+            }
+          }
+
+          if (t.hour < 10)
+          {
+            lcd.print("0");
+          }
+          lcd.print(t.hour);
+          lcd.print(":");
+          if (t.min < 10)
+          {
+            lcd.print("0");
+          }
+          lcd.print(t.min);
+          lcd.print(":");
+          if (t.sec < 10)
+          {
+            lcd.print("0");
+          }
+          lcd.print(t.sec);
+          if (buttonSelect) {
+            lcd.print(AMPM);
+          }
+          else {
+            lcd.print("  ");
+          }
+          //    lcd.print(' ');
+          lcd.print(tempF);
+          lcd.print((char)223);
+          lcd.print(fc);
+          prev = now;
         }
-        //    lcd.print(' ');
-        lcd.print(tempF);
-        lcd.print((char)223);
-        lcd.print(fc);
-        prev = now;
       }
     }
   }
@@ -426,7 +427,7 @@ void parse_cmd(char *cmd, int cmdsize)
     Serial.println(buff);
 #endif
   } else if (cmd[0] == 67 && cmdsize == 1) {  // "C" - get temperature register
-#if 0
+#ifdef DEBUG
     Serial.print("temperature is ");
     Serial.print((DS3231_get_treg() * 9 / 5) + 32, DEC); // F = (C* 9/5) + 32
     Serial.println(" Degrees Fahrenheit");
@@ -554,7 +555,9 @@ bool IsDST(int day, int month, int dow)
   return previousSunday <= 0;
 }
 
-//Display splash screen
+/*
+  Display splash screen.
+*/
 void DisplaySplashScreen()
 {
   lcd.setCursor(6, 0);
