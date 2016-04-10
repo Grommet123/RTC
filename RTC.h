@@ -1,9 +1,9 @@
 /*
- * RTC.h
- *
- * Created: 3/29/2016 1:50:21 PM
- *  Author: Gary Grotsky
- */ 
+   RTC.h
+
+   Created: 3/29/2016 1:50:21 PM
+    Author: Gary Grotsky
+*/
 
 
 #ifndef RTC_h
@@ -14,9 +14,11 @@
 
 #define  DHT11_PRESENT
 
-#define VERSION                 "V4.1" // Minor bug fix
+#define VERSION                 "V4.2" // Splash screen bug fix
+#ifdef  DHT11_PRESENT
 #define TEMPERATURE_OFFSET       1.8   // DHT11 reads high (Cheep Chinese garbage)
 #define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
+#endif
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // The button ADC input
 #define TEMP_HUM_PIN             A1  // The DHT11 input
