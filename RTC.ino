@@ -44,20 +44,18 @@ void setup() {
   Wire.begin();
   DS3231_init(DS3231_INTCN);
   memset(recv, 0, BUFF_MAX);
-#ifdef DEBUG
-  Serial.println("GET time");
-#endif
 
   lcd.begin(16, 2);
   lcd.clear();
 
   // Used to set the clock one time
+#ifdef SET_TIME
+  parse_cmd("T002112321032016", 16);
+  //          ssmmhhWDDMMYYYY
 #ifdef DEBUG
   Serial.println("Setting time");
 #endif
-  //  parse_cmd("T002112321032016", 16);
-  //          ssmmhhWDDMMYYYY
-
+#endif
   // Display splash screen for 5 seconds
   DisplaySplashScreen();
   delay (5000);
@@ -186,7 +184,9 @@ void loop()
       --t.hour; //Not DST, set clock back 1 hour
 #ifdef DEBUG
       Serial.println("It is not DST");
-      Serial.println();
+    }
+    else {
+      Serial.println("It is DST");
 #endif
     }
 
@@ -260,8 +260,10 @@ void loop()
     Serial.println(t.wday);
     Serial.print("Humidity = ");
     Serial.println(humidity);
+#ifdef DHT11_PRESENT
     Serial.print("temperature = ");
     Serial.println(temperature);
+#endif
     Serial.print("flashTimer = ");
     Serial.println(flashTimer);
     Serial.print("shutDownTime = ");
@@ -302,6 +304,7 @@ void loop()
           lcd.setCursor(0, 1);
           lcd.print("DOW = ");
           lcd.print(t.wday);
+		  printDay(t.wday);
           prev = now;
         }
         else {
@@ -480,6 +483,24 @@ void printMonth(int month)
     case 11: lcd.print(" November "); break;
     case 12: lcd.print(" December "); break;
     default: lcd.print(" Error "); break;
+  }
+}
+
+/*
+  Print the day as a word
+*/
+void printDay(int day)
+{
+  switch (day)
+  {
+    case 1:  lcd.print("    Sun "); break;
+    case 2:  lcd.print("    Mon "); break;
+    case 3:  lcd.print("    Tue "); break;
+    case 4:  lcd.print("    Wed "); break;
+    case 5:  lcd.print("    Thu "); break;
+    case 6:  lcd.print("    Fri "); break;
+    case 7:  lcd.print("    Sat "); break;
+    default: lcd.print("    Error "); break;
   }
 }
 
