@@ -11,10 +11,10 @@
 #include "Arduino.h"
 
 //#define DEBUG  // Uncomment to turn on debug
+//#define  DHT11_PRESENT
+//#define SET_TIME
 
-#define  DHT11_PRESENT
-
-#define VERSION                 "V4.2" // Splash screen bug fix
+#define VERSION                 "V5.0" // Display day of the week
 #ifdef  DHT11_PRESENT
 #define TEMPERATURE_OFFSET       1.8   // DHT11 reads high (Cheep Chinese garbage)
 #define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
@@ -50,6 +50,7 @@
 
 void parse_cmd(char *cmd, int cmdsize);
 void printMonth(int month);
+void printDay(int day);
 byte ReadButtons();
 bool IsDST(int day, int month, int dow);
 void DisplaySplashScreen();
