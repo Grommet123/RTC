@@ -66,8 +66,6 @@ void loop()
 {
   char in;
   char tempF[6];
-  float temperature;
-  double humidity;
   float fahrenheit;
   char buff[BUFF_MAX];
   unsigned long now = millis();
@@ -75,6 +73,8 @@ void loop()
   byte button;
   byte timestamp;
   byte flasher;
+  static float temperature = 0.0;
+  static double humidity = 0.0;
   static bool buttonSelect = true;
   static bool pastButtonSelect = false;
   static bool buttonRight = true;
@@ -83,6 +83,9 @@ void loop()
   static bool buttonUp = false;
   static unsigned int shutDownTime = 0;  // Used to shut down the back light
   static unsigned int flashTimer = 0;    // Used to flash the red and blue LEDs
+  static unsigned int averageTempHumTimer = 0;  //  Used to compute the average temp and hum
+  static unsigned int averageTemp = 0;
+  static unsigned int averageHum = 0;
   char fc;
   char AMPM;
 
@@ -191,10 +194,22 @@ void loop()
     }
 
 #ifdef DHT11_PRESENT
-    // Get the temperature and humidity from the DHT11 temperature humidity sensor module
-    DHT.read11(TEMP_HUM_PIN);
-    temperature = DHT.temperature - TEMPERATURE_OFFSET;
-    humidity = DHT.humidity + HUMIDITY_OFFSET;
+    // Get the temperature and humidity from the DHT11 temperature humidity sensor module and average them
+
+	if (averageTempHumTimer <= 59) {
+       DHT.read11(TEMP_HUM_PIN);
+       averageTemp += DHT.temperature;
+	   averageHum += DHT.humidity;
+	   averageTempHumTimer++;
+	}
+	else {
+      temperature = (averageTemp/averageTempHumTimer) + TEMPERATURE_OFFSET;
+	  averageTemp = 0;
+      humidity = (averageHum/averageTempHumTimer) + HUMIDITY_OFFSET;
+	  averageHum = 0;
+	  averageTempHumTimer = 0;
+	}
+    
 #else
     // Get the temperature from the RTC chip. It does not supply humidity
 #ifdef DEBUG
@@ -223,9 +238,8 @@ void loop()
 
     // If Select button pressed, convert to F
     if (buttonSelect) {
-      temperature = (temperature * 9 / 5) + 32; //(C * 9/5) +32 = F
       fc = 'F';
-      dtostrf(temperature, 5, 1, tempF);
+      dtostrf((temperature * 9 / 5) + 32, 5, 1, tempF);
     }
     else { // Leave it in C
       fc = 'C';
@@ -272,7 +286,13 @@ void loop()
     Serial.println(flashTimer);
     Serial.print("flasher = ");
     Serial.println(flasher);
-    Serial.println();
+	Serial.print("averageTempHumTimer = ");
+	Serial.println(averageTempHumTimer);
+	Serial.print("averageTemp = ");
+	Serial.println(averageTemp);
+	Serial.print("averageHum = ");
+	Serial.println(averageHum);
+	Serial.println();
 #endif
 
     // This is where the LCD display is handled (the code speaks for its self :-))
