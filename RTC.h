@@ -10,14 +10,14 @@
 #define RTC_h
 #include "Arduino.h"
 
-//#define DEBUG  // Uncomment to turn on debug
-//#define  DHT11_PRESENT
+#define DEBUG  // Uncomment to turn on debug
+#define  DHT11_PRESENT
 //#define SET_TIME
 
-#define VERSION                 "V5.0" // Display day of the week
+#define VERSION                 "V6.0" // Average temperature and humidity if DHT11 is selected
 #ifdef  DHT11_PRESENT
-#define TEMPERATURE_OFFSET       1.8   // DHT11 reads high (Cheep Chinese garbage)
-#define HUMIDITY_OFFSET          6.0   // DHT11 reads low         "
+#define TEMPERATURE_OFFSET       0.8    // DHT11 offset
+#define HUMIDITY_OFFSET          3.0    // DHT11 offset
 #endif
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // The button ADC input
@@ -46,7 +46,7 @@
 #define DEC                       12
 // Temperature settings
 #define TEMPERATURE_TO_HIGH       78.0f
-#define TEMPERATURE_TO_LOW        60.0f
+#define TEMPERATURE_TO_LOW        65.0f
 
 void parse_cmd(char *cmd, int cmdsize);
 void printMonth(int month);
