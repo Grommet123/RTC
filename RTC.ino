@@ -86,6 +86,7 @@ void loop()
   static unsigned int averageTempHumTimer = 0;  //  Used to compute the average temp and hum
   static unsigned int averageTemp = 0;
   static unsigned int averageHum = 0;
+  static bool firstTimeAverage = false;
   char fc;
   char AMPM;
 
@@ -174,7 +175,7 @@ void loop()
   // show time once a second
   if ((now - prev > interval) && (Serial.available() <= 0)) {
     shutDownTime++;
-    if (shutDownTime >= 60) {
+    if (shutDownTime >= DISPLAY_TIMEOUT) {
       digitalWrite(LCD_BACKLIGHT_PIN, LOW);   //Turn off back light
       shutDownTime = 0;
       buttonRight = false;
@@ -195,21 +196,20 @@ void loop()
 
 #ifdef DHT11_PRESENT
     // Get the temperature and humidity from the DHT11 temperature humidity sensor module and average them
-
-	if (averageTempHumTimer <= 59) {
-       DHT.read11(TEMP_HUM_PIN);
-       averageTemp += DHT.temperature;
-	   averageHum += DHT.humidity;
-	   averageTempHumTimer++;
-	}
-	else {
-      temperature = (averageTemp/averageTempHumTimer) + TEMPERATURE_OFFSET;
-	  averageTemp = 0;
-      humidity = (averageHum/averageTempHumTimer) + HUMIDITY_OFFSET;
-	  averageHum = 0;
-	  averageTempHumTimer = 0;
-	}
-    
+    if (averageTempHumTimer <= AVERAGETEMPHUMTIMER) {
+      DHT.read11(TEMP_HUM_PIN);
+      averageTemp += DHT.temperature;
+      averageHum += DHT.humidity;
+      averageTempHumTimer++;
+    }
+    else {
+      temperature = (averageTemp / averageTempHumTimer) + TEMPERATURE_OFFSET;
+      averageTemp = 0;
+      humidity = (averageHum / averageTempHumTimer) + HUMIDITY_OFFSET;
+      averageHum = 0;
+      averageTempHumTimer = 0;
+      firstTimeAverage = true;
+    }
 #else
     // Get the temperature from the RTC chip. It does not supply humidity
 #ifdef DEBUG
@@ -217,29 +217,44 @@ void loop()
 #endif
     temperature = DS3231_get_treg();
     humidity = 0.0;
+    firstTimeAverage = true;
 #endif
-    // Set the temperature LEDs.  Blink the trouble ones
-    fahrenheit = (temperature * 9 / 5) + 32;
-    if (fahrenheit < TEMPERATURE_TO_LOW) {
-      digitalWrite(BLUE_LED, flasher);
-      digitalWrite(RED_LED, LOW);
-      digitalWrite(GREEN_LED, LOW);
-    }
-    else if (fahrenheit > TEMPERATURE_TO_HIGH) {
+    // Set the temperature LEDs.  Blink the trouble ones (note, the LED module is common
+	// anode, so LOW is on and HIGH is off).
+    // If first time averaging, flash LEDs Yellow
+    if (!firstTimeAverage) {
       digitalWrite(RED_LED, flasher);
-      digitalWrite(BLUE_LED, LOW);
-      digitalWrite(GREEN_LED, LOW);
+      digitalWrite(GREEN_LED, flasher);
+      digitalWrite(BLUE_LED, HIGH);
     }
     else {
-      digitalWrite(GREEN_LED, HIGH);
-      digitalWrite(BLUE_LED, LOW);
-      digitalWrite(RED_LED, LOW);
+      fahrenheit = (temperature * 9 / 5) + 32;
+      if (fahrenheit < TEMPERATURE_TO_LOW) {
+        digitalWrite(BLUE_LED, flasher);
+        digitalWrite(RED_LED, HIGH);
+        digitalWrite(GREEN_LED, HIGH);
+      }
+      else if (fahrenheit > TEMPERATURE_TO_HIGH) {
+        digitalWrite(RED_LED, flasher);
+        digitalWrite(BLUE_LED, HIGH);
+        digitalWrite(GREEN_LED, HIGH);
+      }
+      else {
+        digitalWrite(GREEN_LED, LOW);
+        digitalWrite(BLUE_LED, HIGH);
+        digitalWrite(RED_LED, HIGH);
+      }
     }
 
     // If Select button pressed, convert to F
     if (buttonSelect) {
+      if (!firstTimeAverage) {
+        dtostrf(0, 5, 1, tempF);
+      }
+      else {
+        dtostrf((temperature * 9 / 5) + 32, 5, 1, tempF);
+      }
       fc = 'F';
-      dtostrf((temperature * 9 / 5) + 32, 5, 1, tempF);
     }
     else { // Leave it in C
       fc = 'C';
@@ -286,13 +301,13 @@ void loop()
     Serial.println(flashTimer);
     Serial.print("flasher = ");
     Serial.println(flasher);
-	Serial.print("averageTempHumTimer = ");
-	Serial.println(averageTempHumTimer);
-	Serial.print("averageTemp = ");
-	Serial.println(averageTemp);
-	Serial.print("averageHum = ");
-	Serial.println(averageHum);
-	Serial.println();
+    Serial.print("averageTempHumTimer = ");
+    Serial.println(averageTempHumTimer);
+    Serial.print("averageTemp = ");
+    Serial.println(averageTemp);
+    Serial.print("averageHum = ");
+    Serial.println(averageHum);
+    Serial.println();
 #endif
 
     // This is where the LCD display is handled (the code speaks for its self :-))
@@ -324,7 +339,7 @@ void loop()
           lcd.setCursor(0, 1);
           lcd.print("DOW = ");
           lcd.print(t.wday);
-		  printDay(t.wday);
+          printDay(t.wday);
           prev = now;
         }
         else {
