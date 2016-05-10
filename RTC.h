@@ -10,11 +10,11 @@
 #define RTC_h
 #include "Arduino.h"
 
-#define DEBUG  // Uncomment to turn on debug
+//#define DEBUG  // Uncomment to turn on debug
 #define  DHT11_PRESENT
 //#define SET_TIME
 
-#define VERSION                 "V6.0" // Average temperature and humidity if DHT11 is selected
+#define VERSION                 "V6.1" // Add minor enhancments
 #ifdef  DHT11_PRESENT
 #define TEMPERATURE_OFFSET       0.8    // DHT11 offset
 #define HUMIDITY_OFFSET          3.0    // DHT11 offset
@@ -23,9 +23,9 @@
 #define BUTTON_ADC_PIN           A0  // The button ADC input
 #define TEMP_HUM_PIN             A1  // The DHT11 input
 #define LCD_BACKLIGHT_PIN        10  // The controls LCD back light
-#define RED_LED                  49  // The red LED
-#define GREEN_LED                51  // The green LED
-#define BLUE_LED                 53  // The blue LED
+#define RED_LED                  24  // The red LED
+#define GREEN_LED                26  // The green LED
+#define BLUE_LED                 22  // The blue LED
 // ADC readings expected for the 5 buttons on the ADC input
 #define RIGHT_10BIT_ADC           0  // right
 #define UP_10BIT_ADC            131  // up
@@ -46,7 +46,10 @@
 #define DEC                       12
 // Temperature settings
 #define TEMPERATURE_TO_HIGH       78.0f
-#define TEMPERATURE_TO_LOW        65.0f
+#define TEMPERATURE_TO_LOW        60.0f
+// Timers
+#define DISPLAY_TIMEOUT           60
+#define AVERAGETEMPHUMTIMER       59
 
 void parse_cmd(char *cmd, int cmdsize);
 void printMonth(int month);
