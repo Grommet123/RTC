@@ -38,6 +38,9 @@ void setup() {
   pinMode(RED_LED, OUTPUT);               //red LED is an output
   pinMode(GREEN_LED, OUTPUT);             //green LED is an output
   pinMode(BLUE_LED, OUTPUT);              //blue LED is an output
+  digitalWrite(RED_LED, HIGH);
+  digitalWrite(GREEN_LED, HIGH);
+  digitalWrite(BLUE_LED, HIGH);
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
