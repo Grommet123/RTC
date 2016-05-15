@@ -14,7 +14,7 @@
 #define  DHT11_PRESENT
 //#define SET_TIME
 
-#define VERSION                 "V6.1" // Add minor enhancments
+#define VERSION                 "V6.1" // Add minor enhancements
 #ifdef  DHT11_PRESENT
 #define TEMPERATURE_OFFSET       0.8    // DHT11 offset
 #define HUMIDITY_OFFSET          3.0    // DHT11 offset
@@ -48,7 +48,7 @@
 #define TEMPERATURE_TO_HIGH       78.0f
 #define TEMPERATURE_TO_LOW        60.0f
 // Timers
-#define DISPLAY_TIMEOUT           60
+#define DISPLAY_TIMEOUT           64
 #define AVERAGETEMPHUMTIMER       59
 
 void parse_cmd(char *cmd, int cmdsize);
