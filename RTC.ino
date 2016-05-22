@@ -35,12 +35,18 @@ void setup() {
   //lcd backlight control
   pinMode(LCD_BACKLIGHT_PIN, OUTPUT);     //back light is an output
   digitalWrite(LCD_BACKLIGHT_PIN, HIGH);  //back light control pin is high (on)
-  pinMode(RED_LED, OUTPUT);               //red LED is an output
-  pinMode(GREEN_LED, OUTPUT);             //green LED is an output
-  pinMode(BLUE_LED, OUTPUT);              //blue LED is an output
-  digitalWrite(RED_LED, HIGH);
-  digitalWrite(GREEN_LED, HIGH);
-  digitalWrite(BLUE_LED, HIGH);
+  pinMode(T_RED_LED, OUTPUT);             //temperature red LED is an output
+  pinMode(T_GREEN_LED, OUTPUT);           //temperature green LED is an output
+  pinMode(T_BLUE_LED, OUTPUT);            //temperature blue LED is an output
+  digitalWrite(T_RED_LED, HIGH);
+  digitalWrite(T_GREEN_LED, HIGH);
+  digitalWrite(T_BLUE_LED, HIGH);
+  pinMode(H_RED_LED, OUTPUT);             //humidity red LED is an output
+  pinMode(H_GREEN_LED, OUTPUT);           //humidity green LED is an output
+  pinMode(H_BLUE_LED, OUTPUT);            //humidity blue LED is an output
+  digitalWrite(H_RED_LED, LOW);
+  digitalWrite(H_GREEN_LED, LOW);
+  digitalWrite(H_BLUE_LED, LOW);
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
@@ -223,31 +229,64 @@ void loop()
     firstTimeAverage = true;
 #endif
     // Set the temperature LEDs.  Blink the trouble ones (note, the LED module is common
-	// anode, so LOW is on and HIGH is off).
+    // anode, so LOW is on and HIGH is off).
     // If first time averaging, flash LEDs Yellow
     if (!firstTimeAverage) {
-      digitalWrite(RED_LED, flasher);
-      digitalWrite(GREEN_LED, flasher);
-      digitalWrite(BLUE_LED, HIGH);
+      digitalWrite(T_RED_LED, flasher);
+      digitalWrite(T_GREEN_LED, flasher);
+      digitalWrite(T_BLUE_LED, HIGH);
     }
     else {
       fahrenheit = (temperature * 9 / 5) + 32;
       if (fahrenheit < TEMPERATURE_TO_LOW) {
-        digitalWrite(BLUE_LED, flasher);
-        digitalWrite(RED_LED, HIGH);
-        digitalWrite(GREEN_LED, HIGH);
+        digitalWrite(T_BLUE_LED, flasher);
+        digitalWrite(T_RED_LED, HIGH);
+        digitalWrite(T_GREEN_LED, HIGH);
       }
       else if (fahrenheit > TEMPERATURE_TO_HIGH) {
-        digitalWrite(RED_LED, flasher);
-        digitalWrite(BLUE_LED, HIGH);
-        digitalWrite(GREEN_LED, HIGH);
+        digitalWrite(T_RED_LED, flasher);
+        digitalWrite(T_BLUE_LED, HIGH);
+        digitalWrite(T_GREEN_LED, HIGH);
       }
       else {
-        digitalWrite(GREEN_LED, LOW);
-        digitalWrite(BLUE_LED, HIGH);
-        digitalWrite(RED_LED, HIGH);
+        digitalWrite(T_GREEN_LED, LOW);
+        digitalWrite(T_BLUE_LED, HIGH);
+        digitalWrite(T_RED_LED, HIGH);
       }
     }
+
+    // Set the humidity LEDs.  Blink the trouble ones (note, the LED module is common
+    // cathode, so HIGH is on and LOW is off).
+    // If first time averaging, flash LEDs Yellow
+#ifdef DHT11_PRESENT
+    if (!firstTimeAverage) {
+	    digitalWrite(H_RED_LED, !flasher);
+	    digitalWrite(H_GREEN_LED,! flasher);
+	    digitalWrite(H_BLUE_LED, LOW);
+    }
+    else {
+	    if (humidity < HUMIDITY_TO_LOW) {
+		    digitalWrite(H_BLUE_LED, !flasher);
+		    digitalWrite(H_RED_LED, LOW);
+		    digitalWrite(H_GREEN_LED, LOW);
+	    }
+	    else if (humidity > HUMIDITY_TO_HIGH) {
+		    digitalWrite(H_RED_LED, !flasher);
+		    digitalWrite(H_BLUE_LED, LOW);
+		    digitalWrite(T_GREEN_LED, LOW);
+	    }
+	    else {
+		    digitalWrite(H_GREEN_LED, HIGH);
+		    digitalWrite(H_BLUE_LED, LOW);
+		    digitalWrite(H_RED_LED, LOW);
+	    }
+    }
+#else
+    // No DHT11, so turn off the humidity LEDs
+    digitalWrite(H_GREEN_LED, LOW);
+    digitalWrite(H_BLUE_LED, LOW);
+    digitalWrite(H_RED_LED, LOW);
+#endif
 
     // If Select button pressed, convert to F
     if (buttonSelect) {
@@ -393,7 +432,6 @@ void loop()
           else {
             lcd.print("  ");
           }
-          //    lcd.print(' ');
           lcd.print(tempF);
           lcd.print((char)223);
           lcd.print(fc);
