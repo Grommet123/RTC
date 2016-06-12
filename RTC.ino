@@ -68,11 +68,10 @@ void setup() {
   // Display splash screen for 5 seconds
   DisplaySplashScreen();
   delay (5000);
-}
+} // setup()
 
 // Main loop (forever) routine
-void loop()
-{
+void loop() {
   char in;
   char tempF[6];
   float fahrenheit;
@@ -260,26 +259,26 @@ void loop()
     // If first time averaging, flash LEDs Yellow
 #ifdef DHT11_PRESENT
     if (!firstTimeAverage) {
-	    digitalWrite(H_RED_LED, !flasher);
-	    digitalWrite(H_GREEN_LED,! flasher);
-	    digitalWrite(H_BLUE_LED, LOW);
+      digitalWrite(H_RED_LED, !flasher);
+      digitalWrite(H_GREEN_LED, ! flasher);
+      digitalWrite(H_BLUE_LED, LOW);
     }
     else {
-	    if (humidity < HUMIDITY_TO_LOW) {
-		    digitalWrite(H_BLUE_LED, !flasher);
-		    digitalWrite(H_RED_LED, LOW);
-		    digitalWrite(H_GREEN_LED, LOW);
-	    }
-	    else if (humidity > HUMIDITY_TO_HIGH) {
-		    digitalWrite(H_RED_LED, !flasher);
-		    digitalWrite(H_BLUE_LED, LOW);
-		    digitalWrite(T_GREEN_LED, LOW);
-	    }
-	    else {
-		    digitalWrite(H_GREEN_LED, HIGH);
-		    digitalWrite(H_BLUE_LED, LOW);
-		    digitalWrite(H_RED_LED, LOW);
-	    }
+      if (humidity < HUMIDITY_TO_LOW) {
+        digitalWrite(H_BLUE_LED, !flasher);
+        digitalWrite(H_RED_LED, LOW);
+        digitalWrite(H_GREEN_LED, LOW);
+      }
+      else if (humidity > HUMIDITY_TO_HIGH) {
+        digitalWrite(H_RED_LED, !flasher);
+        digitalWrite(H_BLUE_LED, LOW);
+        digitalWrite(H_GREEN_LED, LOW);
+      }
+      else {
+        digitalWrite(H_GREEN_LED, HIGH);
+        digitalWrite(H_BLUE_LED, LOW);
+        digitalWrite(H_RED_LED, LOW);
+      }
     }
 #else
     // No DHT11, so turn off the humidity LEDs
@@ -440,7 +439,7 @@ void loop()
       }
     }
   }
-}
+} // loop()
 
 /*
   Parse command
