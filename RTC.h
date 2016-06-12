@@ -11,13 +11,12 @@
 #include "Arduino.h"
 
 //#define DEBUG  // Uncomment to turn on debug
-#define  DHT11_PRESENT
 //#define SET_TIME
-
-#define VERSION                 "V7.0" // Add humidity LEDs
 #define  DHT11_PRESENT
-#define TEMPERATURE_OFFSET       0.8    // DHT11 offset
-#define HUMIDITY_OFFSET          3.0    // DHT11 offset
+
+#define VERSION                 "V7.1"  // Minor bug fixes
+#define TEMPERATURE_OFFSET       1.5    // DHT11 temperature offset
+#define HUMIDITY_OFFSET          3.0    // DHT11 humidity offset
 #define BUFF_MAX 128
 #define BUTTON_ADC_PIN           A0  // The button ADC input
 #define TEMP_HUM_PIN             A1  // The DHT11 input
@@ -53,8 +52,8 @@
 #define HUMIDITY_TO_HIGH          65.0f
 #define HUMIDITY_TO_LOW           45.0f
 // Timers
-#define DISPLAY_TIMEOUT           64
-#define AVERAGETEMPHUMTIMER       59
+#define DISPLAY_TIMEOUT           5 * 60   // Minutes
+#define AVERAGETEMPHUMTIMER       1 * 60   //    "
 
 void parse_cmd(char *cmd, int cmdsize);
 void printMonth(int month);
@@ -63,4 +62,4 @@ byte ReadButtons();
 bool IsDST(int day, int month, int dow);
 void DisplaySplashScreen();
 
-#endif
+#endif  // #define RTC_h
