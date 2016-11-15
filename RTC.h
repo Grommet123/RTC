@@ -8,13 +8,13 @@
 
 #ifndef RTC_h
 #define RTC_h
-#include "Arduino.h"
+#include <Arduino.h>
 
 //#define DEBUG  // Uncomment to turn on debug
 //#define SET_TIME
 #define  DHT11_PRESENT
 
-#define VERSION                 "V7.1"  // Minor bug fixes
+#define VERSION                 "V7.2"  // Fix NOV (was 10)
 #define TEMPERATURE_OFFSET       1.5    // DHT11 temperature offset
 #define HUMIDITY_OFFSET          3.0    // DHT11 humidity offset
 #define BUFF_MAX 128
@@ -43,7 +43,7 @@
 #define BUTTON_SELECT             5
 // Used to check the long spelling months
 #define SEP                       9
-#define NOV                       10
+#define NOV                       11
 #define DEC                       12
 // Temperature settings
 #define TEMPERATURE_TO_HIGH       78.0f
