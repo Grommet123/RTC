@@ -386,7 +386,7 @@ void loop() {
         else {
           lcd.clear();
           // Compensate for the long spelling months
-          if ((t.mon == SEP) || (t.mon == NOV) || (t.mon == DEC)) {
+          if ((t.mon == FEB) || (t.mon == SEP) || (t.mon == NOV) || (t.mon == DEC)) {
             lcd.setCursor(0, 0);
           }
           else {
